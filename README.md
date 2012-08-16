@@ -14,4 +14,4 @@ This code is currently licensed under the Creative Commons ["Attribution-ShareAl
 
 ## Contact
 
-If you have suggestions or questions, please e-mail me at wes-code [at] fiksu [dot] co
+If you have suggestions or questions, please e-mail me at wes-code [at] fiksu [dot] com.
