@@ -10,4 +10,4 @@ This script is designed to replace unsafe characters in filenames and folder nam
 
 ## License
 
-This code is currently licensed under the Creative Commons ["Attribution-ShareAlike 3.0 Unported"(http://creativecommons.org/licenses/by-sa/3.0/) license
+This code is currently licensed under the Creative Commons ["Attribution-ShareAlike 3.0 Unported"](http://creativecommons.org/licenses/by-sa/3.0/) license
