@@ -24,7 +24,7 @@ logger = logging.getLogger('box-file-renamer')
 logger.setLevel(logging.DEBUG)
 
 #Create console handler and set level to debug;
-ch = logging.FileHandler('logs/box-file-renamer_' + time.strftime("%Y-%m-%d-%H:%M:%S" + '.log', time.localtime()),
+ch = logging.FileHandler('logs/box-file-renamer_' + time.strftime("%Y-%m-%d_%H-%M-%S" + '.log', time.localtime()),
 	mode='a',
 	encoding=None,
 	delay=False)
@@ -63,9 +63,10 @@ def renameFolders(path):
 		if not isSafe(current):
 			safeRename(current)
 # Safely renames all the files located at the given path, recursively.
-def renameFiles(): 
-	for current in listFiles(rootDirectory):
-		safeRename(current)
+def renameFiles(path): 
+	for current in listOfFiles(path):
+		if not isSafe(current):
+			safeRename(current)
 
 # Returns True if the file or folder has a safe name.
 def isSafe(path):
@@ -79,10 +80,8 @@ def isSafe(path):
 # Safely renames the file or folder at the given path.
 def safeRename(toRename):
 	logger.debug('Renaming: "%(original)s"' % {"original" : toRename}) 
-	toReturn = re.sub(unsafeCharacters,"-", toRename)
-	logger.debug('Renamed: "%(original)s" => "%(renamed)s"' % {"original" : toRename, "renamed" : toReturn}) 
-	toReturn = re.sub(unsafeCharacters,"-", toRename)
-	print toReturn
+	renamed = re.sub(unsafeCharacters,"-", toRename)
+	logger.debug('Renamed: "%(original)s" => "%(renamed)s"' % {"original" : toRename, "renamed" : renamed}) 
 
 # First, we need to rename folders.
 renameFolders(rootDirectory)
