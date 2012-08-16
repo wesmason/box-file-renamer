@@ -118,7 +118,10 @@ def safeRename(toRename, attemptNumber):
 	# If the newName doesn't exist, we have a path name we can use.
 	if not os.path.exists(newName):
 		rename(toRename, newName)
-		logger.debug('Renamed: "%(original)s" => "%(newName)s"' % {"original" : toRename, "newName" : newName}) 
+		logger.debug('Renamed: "%(original)s" => "%(newName)s" after %(numberOfPreviousAttempts)s previous attempts.' %
+			{"original" : toRename,
+			"newName" : newName,
+			"numberOfPreviousAttempts" : attemptNumber})
 	# If the newName does exist, we'll need to try again.
 	else:
 		attemptNumber = attemptNumber + 1
