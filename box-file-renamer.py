@@ -18,7 +18,7 @@ fileList = []						# The list of files
 folderChangeCount = 0				# Track the number of folders that are renamed.
 rootDirectory = ""					# The root directory whence the program recurses.
 subFolderList = []					# The list of subfolders of the root directory.
-unsafeCharacters = '[":<>|*?!]'	# The characters that are 'unsafe' and will be replaced with hyphens.
+unsafeCharacters = '[\[\];\{\}":<>|*?!]'	# The characters that are 'unsafe' and will be replaced with hyphens.
 
 ###########################################################################
 # Logging Setup
