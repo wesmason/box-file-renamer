@@ -62,22 +62,6 @@ def isSafe(path):
 		return False
 	return True
 
-# Recursively walks the path at the given 'path' argument and returns a list of all files located therein
-def listOfFiles(path):
-	toReturn = []
-	for root, subFolders, files in os.walk(path, topdown=False):
-		for file in files:
-			toReturn.append(os.path.join(root,file))
-	return toReturn
-
-# Recursively walks the path at the given 'path' argument and returns a list of all folders located therein
-def listOfFolders(path):
-	toReturn = []
-	for root, subFolders, files in os.walk(path, topdown=False):
-		for subFolder in subFolders:
-			toReturn.append(os.path.join(root,subFolder))
-	return toReturn
-
 # Actually renames the given file or folder to the specified new name.
 def rename(toRename, newName):
 	# Attempt to actually rename the file now.
@@ -97,20 +81,21 @@ def rename(toRename, newName):
 
 # Safely renames all the files located at the given path, recursively.
 def renameFiles(path): 
-	for current in listOfFiles(path):
-		if not isSafe(current):
-			logger.debug('Renaming: "%(original)s"' % {"original" : current})
-			safeRename(current, 0)
-			global fileChangeCount
-			fileChangeCount += 1
+	for root, subFolders, files in os.walk(path, topdown=False):
+		for thisFile in files:
+			if not isSafe(thisFile):
+				safeRename(thisFile, root, 0)
+				global fileChangeCount
+				fileChangeCount += 1
 
 # Safely renames all the folders and subfolders of the given path, recursively.
 def renameFolders(path): 
-	for current in listOfFolders(path):
-		if not isSafe(current):
-			safeRename(current, 0)
-			global folderChangeCount
-			folderChangeCount += 1
+	for root, subFolders, files in os.walk(path, topdown=False):
+		for subFolder in subFolders:
+			if not isSafe(subFolder):
+				safeRename(subFolder, root, 0)
+				global folderChangeCount
+				folderChangeCount += 1
 
 # Performs check to safely rename a file or folder:
 # - Unique Name: Checks to make sure that the new name isn't already in use by another file.
@@ -118,7 +103,7 @@ def renameFolders(path):
 # 
 # To accomplish this, the method calls recurses and tries adding the suffix ".CONFLICT-X", where X is the number of
 # conflicts that existed because of identical file names.
-def safeRename(toRename, attemptNumber):
+def safeRename(toRename, parentFolder, attemptNumber):
 	
 	# Substitutes any unsafe characters with hyphens, a safe character for path names in Windows, Linux, and OS X.
 	newName = re.sub(unsafeCharacters,"-", toRename)
@@ -128,7 +113,7 @@ def safeRename(toRename, attemptNumber):
 		newName = "%(newName)s.CONFLICT-%(attemptNumber)s" % {"newName" : newName, "attemptNumber" : attemptNumber}	
 	# If the newName doesn't exist, we have a path name we can use.
 	if not os.path.exists(newName):
-		rename(toRename, newName)
+		rename(os.path.join(parentFolder, toRename), os.path.join(parentFolder, newName))
 		logger.debug('Renamed: "%(original)s" => "%(newName)s" after %(numberOfPreviousAttempts)s previous attempts.' %
 			{"original" : toRename,
 			"newName" : newName,
@@ -136,7 +121,7 @@ def safeRename(toRename, attemptNumber):
 	# If the newName does exist, we'll need to try again.
 	else:
 		attemptNumber = attemptNumber + 1
-		safeRename(toRename, attemptNumber)
+		safeRename(toRename, parentFolder, attemptNumber)
 
 ###########################################################################
 # Main Script
@@ -166,7 +151,7 @@ def main():
 	renameFolders(args.rootDirectory[0])
 
 	# Now, we'll rename files.
-	renameFiles(args.rootDirectory[0])
+	#renameFiles(args.rootDirectory[0])
 
 	global errorCount
 
