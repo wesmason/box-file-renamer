@@ -11,13 +11,14 @@ import re
 # Global variables
 ###########################################################################
 
+dryRun = False
 errorCount = 0						# Number of errors for exit code and information.
 fileChangeCount = 0					# Track the number of files that are renamed.
 fileList = []						# The list of files
 folderChangeCount = 0				# Track the number of folders that are renamed.
-rootDirectory = ""			# The root directory whence the program recurses.
+rootDirectory = ""					# The root directory whence the program recurses.
 subFolderList = []					# The list of subfolders of the root directory.
-unsafeCharacters = '[\\":<>|*?!]'	# The characters that are 'unsafe' and will be replaced with hyphens.
+unsafeCharacters = '[":<>|*?!]'	# The characters that are 'unsafe' and will be replaced with hyphens.
 
 ###########################################################################
 # Logging Setup
@@ -64,7 +65,7 @@ def isSafe(path):
 # Recursively walks the path at the given 'path' argument and returns a list of all files located therein
 def listOfFiles(path):
 	toReturn = []
-	for root, subFolders, files in os.walk(path):
+	for root, subFolders, files in os.walk(path, topdown=False):
 		for file in files:
 			toReturn.append(os.path.join(root,file))
 	return toReturn
@@ -72,7 +73,7 @@ def listOfFiles(path):
 # Recursively walks the path at the given 'path' argument and returns a list of all folders located therein
 def listOfFolders(path):
 	toReturn = []
-	for root, subFolders, files in os.walk(path):
+	for root, subFolders, files in os.walk(path, topdown=False):
 		for subFolder in subFolders:
 			toReturn.append(os.path.join(root,subFolder))
 	return toReturn
@@ -81,11 +82,16 @@ def listOfFolders(path):
 def rename(toRename, newName):
 	# Attempt to actually rename the file now.
 	try:
-		os.rename(toRename, newName)
+		if dryRun:
+			logger.info("DRY RUN: Renaming %(toRename)s to %(newName)s" % {"toRename" : toRename, "newName" : newName})
+		else:
+			os.rename(toRename, newName)
 	except OSError as e:
+		global errorCount
 		errorCount += 1
 		logger.error("OS Error: An attempt to rename %(toRename)s failed. (Error %(errorNumber)s: %(errorText)s)" %
-			{"errorNumber" : e.errno,
+			{"toRename" : toRename,
+			"errorNumber" : e.errno,
 			"errorText" : e.strerror}
 			)
 
@@ -148,15 +154,21 @@ def main():
 	# Adds arguments to our parser.
 	#parser.add_argument('--loglevel', metavar="level", type=int, nargs=1, help="How verbose to be with logging. The default is none.")
 	parser.add_argument('rootDirectory', metavar="rootDirectory", type=str, nargs=1, help="The directory through which the script should recurse.")
+	parser.add_argument('--dryRun', dest='dryRun', action='store_true', help="Performs a dry run without making any changes.")
 	
 	# Prases the arguments
 	args = parser.parse_args()
+
+	global dryRun
+	dryRun = args.dryRun
 
 	# First, we'll rename the folders.
 	renameFolders(args.rootDirectory[0])
 
 	# Now, we'll rename files.
 	renameFiles(args.rootDirectory[0])
+
+	global errorCount
 
 	if errorCount > 0:
 		logger.info("The script completed with %(numberOfErrors)s errors." % {"numberOfErrors" : errorCount})
