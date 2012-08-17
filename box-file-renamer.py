@@ -151,7 +151,7 @@ def main():
 	renameFolders(args.rootDirectory[0])
 
 	# Now, we'll rename files.
-	#renameFiles(args.rootDirectory[0])
+	renameFiles(args.rootDirectory[0])
 
 	global errorCount
 
